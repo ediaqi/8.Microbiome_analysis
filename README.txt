@@ -1,6 +1,6 @@
 # Microbiome Analysis in R
 
-This project contains an example workflow for microbiome data analysis in R using the `phyloseq` package.
+This project contains an example workflow for microbiome data analysis in R using the `phyloseq` package. The data is simulated.
 
 ## Features
 - Alpha diversity (Shannon, Simpson)
