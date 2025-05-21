@@ -12,9 +12,9 @@ lapply(packages, function(pkg) {
 })
 
 # Loading data (ASV, taxonomy, metadata)
-otu_table <- read.delim("data/example_asv.tsv", row.names = 1, check.names = FALSE)
-taxonomy <- read.delim("data/example_taxonomy.tsv", row.names = 1)
-metadata <- read.csv("data/example_metadata.csv", row.names = 1)
+otu_table <- read.delim("example_asv.tsv", row.names = 1, check.names = FALSE)
+taxonomy <- read.delim("example_taxonomy.tsv", row.names = 1)
+metadata <- read.csv("example_metadata.csv", row.names = 1)
 
 # Creating phyloseq object
 OTU <- otu_table(as.matrix(otu_table), taxa_are_rows = TRUE)
@@ -30,13 +30,13 @@ ps <- phyloseq(OTU, TAX, SAM)
 alpha_df <- estimate_richness(ps, measures = c("Shannon", "Simpson"))
 alpha_df$SampleID <- rownames(alpha_df)
 alpha_df <- cbind(sample_data(ps)[rownames(alpha_df), ], alpha_df)
-write.csv(alpha_df, "results/alpha_beta_plots/alpha_diversity_values.csv", row.names = FALSE)
+alpha_df
 
 # Plot
-alpha_plot <- plot_richness(ps, x = "SampleType", measures = c("Shannon", "Simpson")) +
+alpha_plot <- plot_richness(ps, x = "Healthy", measures = c("Shannon", "Simpson")) +
   theme_minimal() +
   ggtitle("Alpha Diversity")
-ggsave("results/alpha_beta_plots/alpha_diversity.png", alpha_plot, width = 10, height = 6)
+alpha_plot
 
 
 # Beta Diversity
@@ -45,15 +45,15 @@ ggsave("results/alpha_beta_plots/alpha_diversity.png", alpha_plot, width = 10, h
 # Calculation of Bray-Curtis distances
 bray_dist <- phyloseq::distance(ps, method = "bray")
 bray_matrix <- as.matrix(bray_dist)
-write.csv(bray_matrix, "results/alpha_beta_plots/beta_diversity_bray_matrix.csv")
+bray_matrix
 
 # PCoA Ordination Plot
 ord <- ordinate(ps, method = "PCoA", distance = "bray")
-beta_plot <- plot_ordination(ps, ord, color = "SampleType") +
+beta_plot <- plot_ordination(ps, ord, color = "Healthy") +
   geom_point(size = 3) +
   ggtitle("Beta Diversity (PCoA - Bray-Curtis)") +
   theme_minimal()
-ggsave("results/alpha_beta_plots/beta_diversity.png", beta_plot, width = 10, height = 6)
+beta_plot
 
 # Relative Abundance: Barplot
 #################################
@@ -67,10 +67,10 @@ ps_top <- prune_taxa(top_taxa, ps_rel)
 
 # Barplot
 bar_plot <- plot_bar(ps_top, fill = "Phylum") +
-  facet_wrap(~SampleType) +
+  facet_wrap(~Healthy) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   ggtitle("Top 10 Taxa - Relative Abundance")
-ggsave("results/alpha_beta_plots/relative_abundance_barplot.png", bar_plot, width = 10, height = 6)
+bar_plot
 
 
 # Relative Abundance: Violin Plot
@@ -81,10 +81,10 @@ top_taxon <- top_taxa[1]
 df <- psmelt(ps_rel)
 violin_df <- df %>% filter(OTU == top_taxon)
 
-violin_plot <- ggplot(violin_df, aes(x = SampleType, y = Abundance)) +
+violin_plot <- ggplot(violin_df, aes(x = Healthy, y = Abundance)) +
   geom_violin(fill = "skyblue") +
   geom_jitter(width = 0.2) +
   theme_minimal() +
   ggtitle(paste("Violin Plot for", top_taxon))
-ggsave("results/alpha_beta_plots/violin_plot_top_taxon.png", violin_plot, width = 8, height = 5)
+violin_plot
 
